@@ -234,7 +234,7 @@ namespace Nekoyume.Action
             private static byte[] ToBytes(IAccountStateDelta delta, IImmutableSet<Address> updatedAddresses)
             {
                 var state = new Dictionary(
-                    updatedAddresses.Select(addr => new KeyValuePair<IKey, IValue>(
+                    updatedAddresses.Where(addr => addr != ShopState.Address).Select(addr => new KeyValuePair<IKey, IValue>(
                         (Binary) addr.ToByteArray(),
                         delta.GetState(addr) ?? new Bencodex.Types.Null()
                     ))
