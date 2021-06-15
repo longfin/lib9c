@@ -54,7 +54,7 @@ namespace Nekoyume.BlockChain
                 {
                     Transaction<PolymorphicAction<ActionBase>> authProof = StageProofTransaction();
                     Block<PolymorphicAction<ActionBase>> tip = _chain.Tip;
-                    Block<PolymorphicAction<ActionBase>>.Mine(
+                    block = Block<PolymorphicAction<ActionBase>>.Mine(
                         tip.Index + 1,
                         _chain.Policy.GetNextBlockDifficulty(_chain),
                         tip.TotalDifficulty,
@@ -69,7 +69,7 @@ namespace Nekoyume.BlockChain
                 }
                 else
                 {
-                    await _chain.MineBlock(
+                    block = await _chain.MineBlock(
                         Address,
                         DateTimeOffset.UtcNow,
                         cancellationToken: cancellationToken,
@@ -89,7 +89,12 @@ namespace Nekoyume.BlockChain
             {
                 var invalidTx = _chain.GetTransaction(invalidTxException.TxId);
 
-                Log.Debug($"Tx[{invalidTxException.TxId}] is invalid. mark to unstage.");
+                Log.Debug(
+                    invalidTxException, 
+                    "Tx[{TxId}] is invalid. mark to unstage. [exc: {@exc}]", 
+                    invalidTxException.TxId, 
+                    invalidTxException
+                );
                 invalidTxs.Add(invalidTx);
             }
             catch (UnexpectedlyTerminatedActionException actionException)
