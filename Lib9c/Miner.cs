@@ -47,40 +47,35 @@ namespace Nekoyume.BlockChain
             var txs = new HashSet<Transaction<PolymorphicAction<ActionBase>>>();
             var invalidTxs = txs;
 
-            Transaction<PolymorphicAction<ActionBase>> authProof = null;
             Block<PolymorphicAction<ActionBase>> block = null;
             try
             {
                 if (AuthorizedMiner)
                 {
-                    authProof = StageProofTransaction();
-                }
-                block = await _chain.MineBlock(
-                    Address,
-                    DateTimeOffset.UtcNow,
-                    cancellationToken: cancellationToken,
-                    maxTransactions: maxTransactions,
-                    append: false);
-
-                if (authProof is Transaction<PolymorphicAction<ActionBase>> proof &&
-                    !block.Transactions.Contains(proof))
-                {
-                    // For any reason, if the proof tx is not contained mine a new block again
-                    // without any transactions except for the proof tx.
-                    block = Block<PolymorphicAction<ActionBase>>.Mine(
-                        block.Index,
-                        block.Difficulty,
-                        block.TotalDifficulty - block.Difficulty,
+                    Transaction<PolymorphicAction<ActionBase>> authProof = StageProofTransaction();
+                    Block<PolymorphicAction<ActionBase>> tip = _chain.Tip;
+                    Block<PolymorphicAction<ActionBase>>.Mine(
+                        tip.Index + 1,
+                        _chain.Policy.GetNextBlockDifficulty(_chain),
+                        tip.TotalDifficulty,
                         Address,
-                        block.PreviousHash,
+                        tip.Hash,
                         DateTimeOffset.UtcNow,
-                        new[] { proof },
-                        block.ProtocolVersion,
+                        new[] { authProof },
+                        Block<PolymorphicAction<ActionBase>>.CurrentProtocolVersion,
                         cancellationToken
                     );
+                    _chain.Append(block);
+                }
+                else
+                {
+                    await _chain.MineBlock(
+                        Address,
+                        DateTimeOffset.UtcNow,
+                        cancellationToken: cancellationToken,
+                        maxTransactions: maxTransactions);
                 }
 
-                _chain.Append(block);
                 if (_swarm is Swarm<PolymorphicAction<ActionBase>> s && s.Running)
                 {
                     s.BroadcastBlock(block);
