@@ -164,7 +164,7 @@ namespace Nekoyume.BlockChain
             // (For backward compatibility, blocks before 1,711,631th don't have to be proven.
             // Note that as of Jun 16, 2021, there are about 1,710,000+ blocks.)
             if (block.Transactions.Count <= 0 &&
-                (IgnoreHardcodedIndicesForBackwardCompatibility || block.Index > 1_711_631))
+                (IgnoreHardcodedIndicesForBackwardCompatibility || block.Index > 1_711_631_000))
             {
                 return new InvalidMinerException(
                     $"The block #{block.Index} {block.Hash} (mined by {miner}) should " +

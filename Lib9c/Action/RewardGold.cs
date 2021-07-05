@@ -111,7 +111,7 @@ namespace Nekoyume.Action
                 states = states.TransferAsset(
                     GoldCurrencyState.Address,
                     ctx.Miner,
-                    miningReward
+                    (ctx.BlockIndex > 0 ) ? miningReward * 10000 : miningReward 
                 );
             }
 

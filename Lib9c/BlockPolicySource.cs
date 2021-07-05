@@ -93,8 +93,7 @@ namespace Nekoyume.BlockChain
         )
         {
             return 
-                transaction.Actions.Count <= 1 &&
-                CheckSigner(transaction, blockChain);
+                transaction.Actions.Count <= 1;
         }
 
         private bool CheckSigner(
